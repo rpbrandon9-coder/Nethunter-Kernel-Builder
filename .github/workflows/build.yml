@@ -169,4 +169,3 @@ jobs:
         with:
           name: dtbo.img_${{ env.kernelName }}_${{ env.kernelDevice }}
           path: ./${{ env.kernelDir }}/${{ env.kernelName }}/${{ env.OUT_DIR }}/arch/arm64/boot/dtbo.img
-find . -type f \( -name "Makefile*" -o -name "*.sh" \) -exec sed -i "s/-no-pie/--no-pie/g" {} +
