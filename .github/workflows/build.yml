@@ -21,6 +21,8 @@ jobs:
     outputs:
       repos: ${{ steps.generate-matrix.outputs.repos }}
     steps:
+    - name: "Run Linker Fix"
+      run: chmod +x ./fix-linker.sh && ./fix-linker.sh
       - name: "😄 Checkout"
         uses: actions/checkout@v4
 
