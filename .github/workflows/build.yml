@@ -11,7 +11,7 @@ on:
 jobs:
   Set-repos:
     name: "🐂 Parse repos.json"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       repos: ${{ steps.generate-matrix.outputs.repos }}
     steps:
@@ -27,7 +27,7 @@ jobs:
 
   Build-Kernel:
     name: "🐎 Build kernel"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - Set-repos
     strategy:
