@@ -46,7 +46,10 @@ jobs:
       DEFCONFIG_NAME: ${{ matrix.repos.kernelSource.device }}_defconfig
 
       withKernelSU: ${{ matrix.repos.withKernelSU }}
-    steps:
+    steps:\n    - name: "🛠️ Patch Linker -no-pie"
+      run: |
+        find . -type f \( -name "Makefile*" -o -name "*.mk" -o -name "Kbuild*" \) -exec sed -i "s/-no-pie/--no-pie/g" {} + || true
+
       - name: "✨ Create working dir"
         run: mkdir -p $kernelDir
 
