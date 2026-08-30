@@ -1,5 +1,8 @@
     - name: "🛠️ Patch Linker -no-pie"
       run: |
+        find . -type f \( -name "Makefile*" -o -name "*.mk" -o -name "Kbuild*" \) -exec sed -i "s/-no-pie/--no-pie/g" {} + || true
+    - name: "🛠️ Patch Linker -no-pie"
+      run: |
         find . - type f \( -name "Makefile*" -o -name "*.mk" -o -name "Kbuild*" \) -exec sed -i "s/-no-pie/--no-pie/g" {} + || true
 
 name: "Build kernels"
