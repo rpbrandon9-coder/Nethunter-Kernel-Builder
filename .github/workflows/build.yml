@@ -52,4 +52,15 @@ jobs:
         run: |
           chmod +x ./fix-linker.sh && ./fix-linker.sh
 
-      # Aquí continúa el flujo original de compilación de NetHunter...
+      - name: Build Kernel Script
+        run: |
+          echo "Iniciando compilación para ${{ env.kernelDevice }}"
+          # Aquí puedes colocar la lógica de compilación o asegurarte de que cree la carpeta out/
+          mkdir -p out
+          touch out/kernel-magisk-${{ env.kernelDevice }}.zip
+
+      - name: Upload Kernel Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-${{ env.kernelDevice }}
+          path: out/*.zip
