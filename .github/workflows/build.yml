@@ -1,41 +1,33 @@
-    - name: "🛠️ Patch Linker -no-pie"
-      run: |
-        find . -type f \( -name "Makefile*" -o -name "*.mk" -o -name "Kbuild*" \) -exec sed -i "s/-no-pie/--no-pie/g" {} + || true
-    - name: "🛠️ Patch Linker -no-pie"
-      run: |
-        find . - type f \( -name "Makefile*" -o -name "*.mk" -o -name "Kbuild*" \) -exec sed -i "s/-no-pie/--no-pie/g" {} + || true
-
-name: "Build kernels"
-
-env:
-  CONFIGURATION: "repos.json"
-  OUT_DIR: "out"
+name: Build Kernel
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   Set-repos:
-    name: "🐂 Parse repos.json"
+    name: "🐼 Parse repos.json"
     runs-on: ubuntu-22.04
     outputs:
       repos: ${{ steps.generate-matrix.outputs.repos }}
     steps:
-    - name: "Run Linker Fix"
-      run: chmod +x ./fix-linker.sh && ./fix-linker.sh
-      - name: "😄 Checkout"
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: "😆 Generate Matrix"
+      - name: Run Linker Fix
+        run: |
+          chmod +x ./fix-linker.sh && ./fix-linker.sh
+
+      - name: "🐼 Generate Matrix"
         id: generate-matrix
         run: |
           echo "repos<<EOF" >> $GITHUB_OUTPUT
-          cat  ${{ env.CONFIGURATION }} >> $GITHUB_OUTPUT
+          cat repos.json >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   Build-Kernel:
-    name: "🐎 Build kernel"
+    name: "🐼 Build kernel"
     runs-on: ubuntu-22.04
     needs:
       - Set-repos
@@ -46,13 +38,18 @@ jobs:
         repos: ${{ fromJSON(needs.Set-repos.outputs.repos) }}
     env:
       kernelDir: ${{ matrix.repos.kernelSource.name }}_${{ matrix.repos.kernelSource.device }}
-
       kernelName: ${{ matrix.repos.kernelSource.name }}
       kernelRepo: ${{ matrix.repos.kernelSource.repo }}
       kernelBranch: ${{ matrix.repos.kernelSource.branch }}
       kernelDevice: ${{ matrix.repos.kernelSource.device }}
-
       DEFCONFIG_NAME: ${{ matrix.repos.kernelSource.device }}_defconfig
-
       withKernelSU: ${{ matrix.repos.withKernelSU }}
-    steps:\n
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Linker Fix before build
+        run: |
+          chmod +x ./fix-linker.sh && ./fix-linker.sh
+
+      # Aquí continúa el flujo original de compilación de NetHunter...
