@@ -61,6 +61,11 @@ jobs:
           git clone --depth=1 ${{ env.kernelRepo }} -b ${{ env.kernelBranch }} kernel_source
           git clone --depth=1 https://github.com/kdrag0n/proton-clang.git toolchain
 
+      - name: Patch -no-pie flag for modern ld
+        run: |
+          cd kernel_source
+          find . -type f \( -name "Makefile*" -o -name "*.mk" \) -exec sed -i 's/-no-pie/--no-pie/g' {} +
+
       - name: Build Kernel
         run: |
           cd kernel_source
