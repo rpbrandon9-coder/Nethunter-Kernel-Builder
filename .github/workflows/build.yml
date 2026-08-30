@@ -15,10 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Linker Fix
-        run: |
-          chmod +x ./fix-linker.sh && ./fix-linker.sh
-
       - name: "🐼 Generate Matrix"
         id: generate-matrix
         run: |
@@ -48,10 +44,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Linker Fix before build
-        run: |
-          chmod +x ./fix-linker.sh && ./fix-linker.sh
-
       - name: Setup Compilation Environment
         run: |
           sudo apt-get update && sudo apt-get install -y bc bison build-essential git flex libelf-dev libssl-dev zlib1g-dev
@@ -61,10 +53,11 @@ jobs:
           git clone --depth=1 ${{ env.kernelRepo }} -b ${{ env.kernelBranch }} kernel_source
           git clone --depth=1 https://github.com/kdrag0n/proton-clang.git toolchain
 
-      - name: Patch -no-pie flag for modern ld
+      - name: Remove unsupported no-pie flags from Makefiles
         run: |
           cd kernel_source
-          find . -type f \( -name "Makefile*" -o -name "*.mk" \) -exec sed -i 's/-no-pie/--no-pie/g' {} +
+          find . -type f \( -name "Makefile*" -o -name "*.mk" \) -exec sed -i 's/-no-pie//g' {} +
+          find . -type f \( -name "Makefile*" -o -name "*.mk" \) -exec sed -i 's/--no-pie//g' {} +
 
       - name: Build Kernel
         run: |
