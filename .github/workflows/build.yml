@@ -52,15 +52,39 @@ jobs:
         run: |
           chmod +x ./fix-linker.sh && ./fix-linker.sh
 
-      - name: Build Kernel Script
+      - name: Setup Compilation Environment
         run: |
-          echo "Iniciando compilación para ${{ env.kernelDevice }}"
-          # Aquí puedes colocar la lógica de compilación o asegurarte de que cree la carpeta out/
-          mkdir -p out
-          touch out/kernel-magisk-${{ env.kernelDevice }}.zip
+          sudo apt-get update && sudo apt-get install -y bc bison build-essential git flex libelf-dev libssl-dev zlib1g-dev
 
-      - name: Upload Kernel Artifact
+      - name: Clone Kernel Source and Toolchain
+        run: |
+          git clone --depth=1 ${{ env.kernelRepo }} -b ${{ env.kernelBranch }} kernel_source
+          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git toolchain
+
+      - name: Build Kernel
+        run: |
+          cd kernel_source
+          export PATH="$(pwd)/../toolchain/bin:$PATH"
+          export ARCH=arm64
+          export SUBARCH=arm64
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+          
+          # Generar configuración
+          make O=out ${{ env.DEFCONFIG_NAME }}
+          
+          # Compilar
+          make -j$(nproc) O=out CC=clang AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip
+
+      - name: Package Kernel (AnyKernel3)
+        run: |
+          git clone https://github.com/kernel-makers/AnyKernel3 -b master anykernel
+          cp kernel_source/out/arch/arm64/boot/Image.gz-dtb anykernel/
+          cd anykernel
+          zip -r9 ../kernel-${{ env.kernelDevice }}.zip *
+
+      - name: Upload Real Kernel Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-${{ env.kernelDevice }}
-          path: out/*.zip
+          name: kernel-${{ env.kernelDevice }}-real
+          path: kernel-*.zip
